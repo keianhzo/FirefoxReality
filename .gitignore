@@ -1,7 +1,6 @@
 # Built application files
 *.apk
 *.ap_
-*.aar
 
 # Files for the ART/Dalvik VM
 *.dex
@@ -64,5 +63,3 @@ oculussig_*
 
 # Third Party SDKs
 third_party
-
-user.properties*
