@@ -9,6 +9,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.vrbrowser.R;
 import org.mozilla.vrbrowser.SessionStore;
@@ -21,6 +23,7 @@ public class CrashDialogWidget extends UIWidget {
     private Button mLearnMoreButton;
     private Button mDontSendButton;
     private Button mSendDataButton;
+    private CheckBox mSendDataCheckBox;
     private AudioEngine mAudio;
 
     public CrashDialogWidget(Context aContext) {
@@ -84,6 +87,18 @@ public class CrashDialogWidget extends UIWidget {
             }
         });
 
+        mSendDataCheckBox = findViewById(R.id.crashSendDataCheckbox);
+        mSendDataCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (mAudio != null) {
+                    mAudio.playSound(AudioEngine.Sound.CLICK);
+                }
+
+
+            }
+        });
+
         mAudio = AudioEngine.fromContext(aContext);
     }
 
@@ -97,5 +112,12 @@ public class CrashDialogWidget extends UIWidget {
         aPlacement.anchorX = 0.5f;
         aPlacement.anchorY = 0.5f;
         aPlacement.translationZ = WidgetPlacement.unitFromMeters(getContext(), R.dimen.crash_dialog_world_z);
+    }
+
+    @Override
+    protected void onBackButton() {
+        hide();
+        if (mDelegate != null)
+            mDelegate.onWidgetClosed(getHandle());
     }
 }

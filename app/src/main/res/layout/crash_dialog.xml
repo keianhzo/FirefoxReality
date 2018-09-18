@@ -34,13 +34,15 @@
             tools:text="@string/crash_dialog_message"
             android:layout_marginEnd="70dp" android:layout_marginStart="70dp"/>
     <CheckBox
-            android:id="@+id/crashSendData"
+            android:id="@+id/crashSendDataCheckbox"
             android:layout_marginTop="25dp"
             android:text="@string/crash_dialog_send_data"
             tools:text="@string/crash_dialog_send_data"
             android:paddingStart="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:maxHeight="18dp"
+            android:gravity="center_vertical"
             android:background="@android:color/transparent"
             android:button="@drawable/checkbox"/>
 

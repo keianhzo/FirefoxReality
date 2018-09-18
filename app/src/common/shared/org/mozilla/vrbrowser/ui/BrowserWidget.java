@@ -44,6 +44,7 @@ public class BrowserWidget extends View implements Widget, SessionStore.SessionC
         mWidgetManager = (WidgetManagerDelegate) aContext;
         SessionStore.get().addSessionChangeListener(this);
         SessionStore.get().addPromptListener(this);
+        SessionStore.get().addContentListener(this);
         setFocusableInTouchMode(true);
         GeckoSession session = SessionStore.get().getSession(mSessionId);
         if (session != null) {
@@ -179,6 +180,8 @@ public class BrowserWidget extends View implements Widget, SessionStore.SessionC
     @Override
     public void releaseWidget() {
         SessionStore.get().removeSessionChangeListener(this);
+        SessionStore.get().removePromptListener(this);
+        SessionStore.get().removeContentListener(this);
         GeckoSession session = SessionStore.get().getSession(mSessionId);
         if (session == null) {
             return;
