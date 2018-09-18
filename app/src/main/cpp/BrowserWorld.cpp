@@ -851,6 +851,15 @@ BrowserWorld::~BrowserWorld() {}
 
 void
 BrowserWorld::DrawWorld() {
+/*
+  static int count = 0;
+  count++;
+  if (count == 300) {
+    int* nullp = nullptr;
+    VRB_ERROR("ABOUT TO CRASH!");
+    int x = *nullp + 1;
+  }
+*/
   m.externalVR->SetCompositorEnabled(true);
   m.device->SetRenderMode(device::RenderMode::StandAlone);
   vrb::Vector headPosition = m.device->GetHeadTransform().GetTranslation();

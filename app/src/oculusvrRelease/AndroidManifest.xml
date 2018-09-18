@@ -41,5 +41,15 @@
             </intent-filter>
             -->
         </activity>
+        <!-- needs to match the default AndroidManifest.xml -->
+        <service
+            android:name=".CrashReporterService"
+            android:exported="false"
+            android:process=":crash">
+        </service>
+        <service
+            android:name=".ChildCrashReporterService"
+            android:exported="false">
+        </service>
     </application>
 </manifest>

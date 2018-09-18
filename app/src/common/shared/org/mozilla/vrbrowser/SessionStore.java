@@ -52,6 +52,14 @@ public class SessionStore implements GeckoSession.NavigationDelegate, GeckoSessi
         void onCurrentSessionChange(GeckoSession aSession, int aId);
     }
 
+    class SessionSettings {
+        boolean multiprocess = SettingsStore.getInstance(mContext).isMultiprocessEnabled();
+        boolean privateMode = false;
+        boolean trackingProtection = true;
+        boolean suspendMediaWhenInactive = true;
+        int userAgentMode = SettingsStore.getInstance(mContext).getUaMode();
+    }
+
     class State {
         boolean mCanGoBack;
         boolean mCanGoForward;
@@ -62,6 +70,7 @@ public class SessionStore implements GeckoSession.NavigationDelegate, GeckoSessi
         String mTitle;
         boolean mFullScreen;
         GeckoSession mSession;
+        SessionSettings mSettings;
     }
 
     private GeckoRuntime mRuntime;
@@ -129,8 +138,7 @@ public class SessionStore implements GeckoSession.NavigationDelegate, GeckoSessi
             // FIXME: Once GeckoView has a prefs API
             vrPrefsWorkAround(aContext);
             GeckoRuntimeSettings.Builder runtimeSettingsBuilder = new GeckoRuntimeSettings.Builder();
-//            runtimeSettingsBuilder.javaCrashReportingEnabled(SettingsStore.getInstance(aContext).isCrashReportingEnabled());
-//            runtimeSettingsBuilder.nativeCrashReportingEnabled(SettingsStore.getInstance(aContext).isCrashReportingEnabled());
+            runtimeSettingsBuilder.crashHandler(CrashReporterService.class);
             runtimeSettingsBuilder.trackingProtectionCategories(GeckoSession.TrackingProtectionDelegate.CATEGORY_AD | GeckoSession.TrackingProtectionDelegate.CATEGORY_SOCIAL | GeckoSession.TrackingProtectionDelegate.CATEGORY_ANALYTIC);
             runtimeSettingsBuilder.consoleOutput(SettingsStore.getInstance(aContext).isConsoleLogsEnabled());
             runtimeSettingsBuilder.displayDensityOverride(SettingsStore.getInstance(aContext).getDisplayDensity());
@@ -269,19 +277,12 @@ public class SessionStore implements GeckoSession.NavigationDelegate, GeckoSessi
         mPromptListeners.remove(aListener);
     }
 
-    public class SessionSettings {
-        public boolean multiprocess = SettingsStore.getInstance(mContext).isMultiprocessEnabled();
-        public boolean privateMode = false;
-        public boolean trackingProtection = true;
-        public boolean suspendMediaWhenInactive = true;
-        public int userAgentMode = SettingsStore.getInstance(mContext).getUaMode();
-    }
-
     public int createSession() {
         return createSession(new SessionSettings());
     }
-    public int createSession(SessionSettings aSettings) {
+    int createSession(SessionSettings aSettings) {
         State state = new State();
+        state.mSettings = aSettings;
         state.mSession = new GeckoSession();
 
         int result = state.mSession.hashCode();
@@ -914,7 +915,9 @@ public class SessionStore implements GeckoSession.NavigationDelegate, GeckoSessi
 
     @Override
     public void onCrash(GeckoSession session) {
-
+       Log.e(LOGTAG,"Child crashed. Creating new session");
+       session.open(mRuntime);
+       session.loadUri(getHomeUri());
     }
 
     // TextInput Delegate

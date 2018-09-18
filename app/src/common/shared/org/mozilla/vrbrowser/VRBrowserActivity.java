@@ -21,12 +21,17 @@ import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import com.mozilla.speechlibrary.MozillaSpeechService;
 import org.mozilla.gecko.GeckoVRManager;
+import org.mozilla.geckoview.CrashReporter;
+import org.mozilla.geckoview.GeckoRuntime;
 import org.mozilla.vrbrowser.audio.AudioEngine;
 import org.mozilla.vrbrowser.audio.VRAudioTheme;
 import org.mozilla.vrbrowser.search.SearchEngine;
 import org.mozilla.vrbrowser.telemetry.TelemetryWrapper;
 import org.mozilla.vrbrowser.ui.*;
 
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -46,6 +51,16 @@ public class VRBrowserActivity extends PlatformActivity implements WidgetManager
     // Used to load the 'native-lib' library on application startup.
     static {
         System.loadLibrary("native-lib");
+    }
+
+    static WeakReference<VRBrowserActivity> mMainActivity;
+
+    static VRBrowserActivity get() {
+        WeakReference<VRBrowserActivity> local = mMainActivity;
+        if (local == null) {
+            return null;
+        }
+        return local.get();
     }
 
     static final int NoGesture = -1;
@@ -80,6 +95,7 @@ public class VRBrowserActivity extends PlatformActivity implements WidgetManager
         if (BuildConfig.FLAVOR == "oculusvr") {
             workaroundGeckoSigAction();
         }
+        mMainActivity = new WeakReference<>(this);
         mUiThread = Thread.currentThread();
         SessionStore.get().setContext(this);
 
@@ -231,10 +247,16 @@ public class VRBrowserActivity extends PlatformActivity implements WidgetManager
             if (intent.getData() != null) {
                 loadFromIntent(intent);
             }
+        } else if (GeckoRuntime.ACTION_CRASHED.equals(intent.getAction())) {
+            handleCrashIntent(intent);
         }
     }
 
     void loadFromIntent(final Intent intent) {
+        if (GeckoRuntime.ACTION_CRASHED.equals(intent.getAction())) {
+            handleCrashIntent(intent);
+        }
+
         final Uri uri = intent.getData();
         if (SessionStore.get().getCurrentSession() == null) {
             String url = (uri != null ? uri.toString() : null);
@@ -246,6 +268,36 @@ public class VRBrowserActivity extends PlatformActivity implements WidgetManager
             Log.d(LOGTAG, "Loading URI from intent: " + uri.toString());
             SessionStore.get().loadUri(uri.toString());
         }
+    }
+
+    public void sendChildCrashIntent(final Intent intent) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                handleCrashIntent(intent);
+            }
+        });
+    }
+
+    private void handleCrashIntent(Intent intent) {
+        Log.e(LOGTAG, "Got crashed intent");
+        Log.d(LOGTAG, "Dump File: " +
+                intent.getStringExtra(GeckoRuntime.EXTRA_MINIDUMP_PATH));
+        Log.d(LOGTAG, "Extras File: " +
+                intent.getStringExtra(GeckoRuntime.EXTRA_EXTRAS_PATH));
+        Log.d(LOGTAG, "Dump Success: " +
+                intent.getBooleanExtra(GeckoRuntime.EXTRA_MINIDUMP_SUCCESS, false));
+        Log.d(LOGTAG, "Fatal: " +
+                intent.getBooleanExtra(GeckoRuntime.EXTRA_CRASH_FATAL, false));
+        
+        /*
+        // Code for actually sending the crash report
+        try {
+            CrashReporter.sendCrashReport(this, intent, "FirefoxReality");
+        } catch (IOException|URISyntaxException e) {
+            Log.e(LOGTAG, "Failed to send crash report: " + e.toString());
+        }
+        */
     }
 
     @Override

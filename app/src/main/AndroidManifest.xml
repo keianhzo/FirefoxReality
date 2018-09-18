@@ -29,5 +29,15 @@
                 <data android:scheme="https" />
             </intent-filter>
         </activity>
+        <!-- If the crash reporter service is updated, it must also be updated in oculusvrRelease AndroidManifest.xml -->
+        <service
+            android:name=".CrashReporterService"
+            android:exported="false"
+            android:process=":crash">
+        </service>
+        <service
+            android:name=".ChildCrashReporterService"
+            android:exported="false">
+        </service>
     </application>
 </manifest>
