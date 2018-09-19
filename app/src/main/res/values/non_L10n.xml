@@ -26,7 +26,7 @@
     <string name="help_url" translatable="false">https://support.mozilla.org/products/firefox-reality</string>
     <string name="list_item_view_tag" translatable="false">view</string>
     <string name="position_tag" translatable="false">position</string>
-    <string name="crash_dialog_learn_more_url" translatable="false"></string>
+    <string name="crash_dialog_learn_more_url" translatable="false">https://support.mozilla.org/kb/crash-reporting-firefox-reality</string>
 
     <!-- SEARCH ENGINES -->
     <string name="geolocation_api_url" translatable="false">https://location.services.mozilla.com/v1/country</string>
