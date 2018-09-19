@@ -19,8 +19,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
-import com.mozilla.speechlibrary.MozillaSpeechService;
 import org.mozilla.gecko.GeckoVRManager;
+import org.mozilla.gecko.util.ThreadUtils;
 import org.mozilla.geckoview.CrashReporter;
 import org.mozilla.geckoview.GeckoRuntime;
 import org.mozilla.vrbrowser.audio.AudioEngine;
@@ -81,6 +81,7 @@ public class VRBrowserActivity extends PlatformActivity implements WidgetManager
     BrowserWidget mBrowserWidget;
     KeyboardWidget mKeyboard;
     NavigationBarWidget mNavigationBar;
+    private CrashDialogWidget mCrashDialog;
     TopBarWidget mTopBar;
     TrayWidget mTray;
     PermissionDelegate mPermissionDelegate;
@@ -279,25 +280,48 @@ public class VRBrowserActivity extends PlatformActivity implements WidgetManager
         });
     }
 
-    private void handleCrashIntent(Intent intent) {
-        Log.e(LOGTAG, "Got crashed intent");
-        Log.d(LOGTAG, "Dump File: " +
+    private void handleCrashIntent(final Intent intent) {
+        Log.e(LOGTAG, "======> Got crashed intent");
+        Log.d(LOGTAG, "======> Dump File: " +
                 intent.getStringExtra(GeckoRuntime.EXTRA_MINIDUMP_PATH));
-        Log.d(LOGTAG, "Extras File: " +
+        Log.d(LOGTAG, "======> Extras File: " +
                 intent.getStringExtra(GeckoRuntime.EXTRA_EXTRAS_PATH));
-        Log.d(LOGTAG, "Dump Success: " +
+        Log.d(LOGTAG, "======> Dump Success: " +
                 intent.getBooleanExtra(GeckoRuntime.EXTRA_MINIDUMP_SUCCESS, false));
-        Log.d(LOGTAG, "Fatal: " +
+        Log.d(LOGTAG, "======> Fatal: " +
                 intent.getBooleanExtra(GeckoRuntime.EXTRA_CRASH_FATAL, false));
-        
-        /*
-        // Code for actually sending the crash report
-        try {
-            CrashReporter.sendCrashReport(this, intent, "FirefoxReality");
-        } catch (IOException|URISyntaxException e) {
-            Log.e(LOGTAG, "Failed to send crash report: " + e.toString());
+
+        final boolean isCrashReportingEnabled = SettingsStore.getInstance(this).isCrashReportingEnabled();
+        if (isCrashReportingEnabled) {
+            sendCrashData(intent);
+
+        } else {
+            if (mCrashDialog == null) {
+                mCrashDialog = new CrashDialogWidget(this);
+                mCrashDialog.setCrashDialogDelegate(new CrashDialogWidget.CrashDialogDelegate() {
+                    @Override
+                    public void onSendData() {
+                        sendCrashData(intent);
+                    }
+                });
+            }
+
+            mCrashDialog.show();
         }
-        */
+    }
+
+    private void sendCrashData(final Intent intent) {
+        ThreadUtils.postToBackgroundThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    CrashReporter.sendCrashReport(VRBrowserActivity.this, intent, getString(R.string.crash_app_name));
+
+                } catch (IOException | URISyntaxException e) {
+                    Log.e(LOGTAG, "Failed to send crash report: " + e.toString());
+                }
+            }
+        });
     }
 
     @Override

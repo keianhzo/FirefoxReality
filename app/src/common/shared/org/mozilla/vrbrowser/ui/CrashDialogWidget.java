@@ -14,17 +14,23 @@ import android.widget.CompoundButton;
 import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.vrbrowser.R;
 import org.mozilla.vrbrowser.SessionStore;
+import org.mozilla.vrbrowser.SettingsStore;
 import org.mozilla.vrbrowser.WidgetPlacement;
 import org.mozilla.vrbrowser.audio.AudioEngine;
 
 public class CrashDialogWidget extends UIWidget {
     private static final String LOGTAG = "VRB";
 
+    public interface CrashDialogDelegate {
+        void onSendData();
+    }
+
     private Button mLearnMoreButton;
     private Button mDontSendButton;
     private Button mSendDataButton;
     private CheckBox mSendDataCheckBox;
     private AudioEngine mAudio;
+    private CrashDialogDelegate mCrashDialogDelegate;
 
     public CrashDialogWidget(Context aContext) {
         super(aContext);
@@ -73,7 +79,7 @@ public class CrashDialogWidget extends UIWidget {
                     mAudio.playSound(AudioEngine.Sound.CLICK);
                 }
 
-
+                hide();
             }
         });
         mSendDataButton.setOnClickListener(new OnClickListener() {
@@ -83,19 +89,24 @@ public class CrashDialogWidget extends UIWidget {
                     mAudio.playSound(AudioEngine.Sound.CLICK);
                 }
 
+                if(mCrashDialogDelegate != null) {
+                    mCrashDialogDelegate.onSendData();
+                }
 
+                SettingsStore.getInstance(getContext()).setCrashReportingEnabled(mSendDataCheckBox.isChecked());
+
+                hide();
             }
         });
 
         mSendDataCheckBox = findViewById(R.id.crashSendDataCheckbox);
+        mSendDataCheckBox.setChecked(SettingsStore.getInstance(getContext()).isCrashReportingEnabled());
         mSendDataCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (mAudio != null) {
                     mAudio.playSound(AudioEngine.Sound.CLICK);
                 }
-
-
             }
         });
 
@@ -111,6 +122,7 @@ public class CrashDialogWidget extends UIWidget {
         aPlacement.parentAnchorY = 0.5f;
         aPlacement.anchorX = 0.5f;
         aPlacement.anchorY = 0.5f;
+        aPlacement.translationY = WidgetPlacement.unitFromMeters(getContext(), R.dimen.crash_dialog_world_y);
         aPlacement.translationZ = WidgetPlacement.unitFromMeters(getContext(), R.dimen.crash_dialog_world_z);
     }
 
@@ -119,5 +131,9 @@ public class CrashDialogWidget extends UIWidget {
         hide();
         if (mDelegate != null)
             mDelegate.onWidgetClosed(getHandle());
+    }
+
+    public void setCrashDialogDelegate(CrashDialogDelegate aDelegate) {
+        mCrashDialogDelegate = aDelegate;
     }
 }

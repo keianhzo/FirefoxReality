@@ -22,7 +22,7 @@ import org.mozilla.vrbrowser.*;
 import org.mozilla.vrbrowser.ui.prompts.ChoicePromptWidget;
 
 
-public class BrowserWidget extends View implements Widget, SessionStore.SessionChangeListener, GeckoSession.PromptDelegate, GeckoSession.ContentDelegate {
+public class BrowserWidget extends View implements Widget, SessionStore.SessionChangeListener, GeckoSession.PromptDelegate {
 
     private static final String LOGTAG = "VRB";
 
@@ -36,7 +36,6 @@ public class BrowserWidget extends View implements Widget, SessionStore.SessionC
     private WidgetPlacement mWidgetPlacement;
     private WidgetManagerDelegate mWidgetManager;
     private ChoicePromptWidget mChoicePrompt;
-    private CrashDialogWidget mCrashDialog;
 
     public BrowserWidget(Context aContext, int aSessionId) {
         super(aContext);
@@ -44,7 +43,6 @@ public class BrowserWidget extends View implements Widget, SessionStore.SessionC
         mWidgetManager = (WidgetManagerDelegate) aContext;
         SessionStore.get().addSessionChangeListener(this);
         SessionStore.get().addPromptListener(this);
-        SessionStore.get().addContentListener(this);
         setFocusableInTouchMode(true);
         GeckoSession session = SessionStore.get().getSession(mSessionId);
         if (session != null) {
@@ -181,7 +179,6 @@ public class BrowserWidget extends View implements Widget, SessionStore.SessionC
     public void releaseWidget() {
         SessionStore.get().removeSessionChangeListener(this);
         SessionStore.get().removePromptListener(this);
-        SessionStore.get().removeContentListener(this);
         GeckoSession session = SessionStore.get().getSession(mSessionId);
         if (session == null) {
             return;
@@ -385,47 +382,5 @@ public class BrowserWidget extends View implements Widget, SessionStore.SessionC
     @Override
     public void onFilePrompt(GeckoSession session, String title, int type, String[] mimeTypes, FileCallback callback) {
 
-    }
-
-    // Content Delegate
-
-    @Override
-    public void onTitleChange(GeckoSession session, String title) {
-
-    }
-
-    @Override
-    public void onFocusRequest(GeckoSession session) {
-
-    }
-
-    @Override
-    public void onCloseRequest(GeckoSession session) {
-
-    }
-
-    @Override
-    public void onFullScreen(GeckoSession session, boolean fullScreen) {
-
-    }
-
-    @Override
-    public void onContextMenu(GeckoSession session, int screenX, int screenY, String uri, int elementType, String elementSrc) {
-
-    }
-
-    @Override
-    public void onExternalResponse(GeckoSession session, GeckoSession.WebResponseInfo response) {
-
-    }
-
-    @Override
-    public void onCrash(GeckoSession session) {
-        if (mCrashDialog == null) {
-            mCrashDialog = new CrashDialogWidget(getContext());
-            mCrashDialog.mWidgetPlacement.parentHandle = getHandle();
-        }
-
-        mCrashDialog.show();
     }
 }

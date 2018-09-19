@@ -96,5 +96,6 @@
     <!-- Crash Dialog prompt -->
     <dimen name="crash_dialog_width">450dp</dimen>
     <dimen name="crash_dialog_height">340dp</dimen>
-    <item name="crash_dialog_world_z" format="float" type="dimen">1.5</item>
+    <item name="crash_dialog_world_y" format="float" type="dimen">1.6</item>
+    <item name="crash_dialog_world_z" format="float" type="dimen">-1.8</item>
 </resources>
