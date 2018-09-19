@@ -81,7 +81,7 @@ public class VRBrowserActivity extends PlatformActivity implements WidgetManager
     BrowserWidget mBrowserWidget;
     KeyboardWidget mKeyboard;
     NavigationBarWidget mNavigationBar;
-    private CrashDialogWidget mCrashDialog;
+    CrashDialogWidget mCrashDialog;
     TopBarWidget mTopBar;
     TrayWidget mTray;
     PermissionDelegate mPermissionDelegate;
@@ -291,7 +291,7 @@ public class VRBrowserActivity extends PlatformActivity implements WidgetManager
         Log.d(LOGTAG, "======> Fatal: " +
                 intent.getBooleanExtra(GeckoRuntime.EXTRA_CRASH_FATAL, false));
 
-        final boolean isCrashReportingEnabled = SettingsStore.getInstance(this).isCrashReportingEnabled();
+        boolean isCrashReportingEnabled = SettingsStore.getInstance(this).isCrashReportingEnabled();
         if (isCrashReportingEnabled) {
             sendCrashData(intent);
 
