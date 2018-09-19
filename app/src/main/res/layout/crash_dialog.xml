@@ -9,10 +9,10 @@
               android:gravity="center_horizontal"
 >
     <ImageView
-            android:layout_width="76dp"
+            android:layout_width="wrap_content"
             android:layout_height="76dp"
             android:layout_marginTop="25dp"
-            app:srcCompat="@drawable/crow_background2"
+            app:srcCompat="@drawable/sad_fox"
             android:id="@+id/imageView"/>
     <TextView
             android:text="@string/crash_dialog_header"
@@ -61,7 +61,6 @@
                 android:text="@string/learn_more_button"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif"
-                android:padding="10dp"
                 android:layout_marginEnd="20dp"/>
         <Button
                 android:id="@+id/dontSendButton"
@@ -73,7 +72,6 @@
                 android:text="@string/dont_sent_button"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif"
-                android:padding="10dp"
                 android:layout_marginEnd="20dp"/>
         <Button
                 android:id="@+id/sendDataButton"
@@ -85,6 +83,6 @@
                 android:text="@string/send_data_button"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif"
-                android:padding="10dp"/>
+        />
     </LinearLayout>
 </LinearLayout>
