@@ -33,7 +33,7 @@ RUN locale-gen en_US.UTF-8
 
 # -- Android SDK ------------------------------------------------------------------------
 
-RUN cd /opt && wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -O android-sdk.zip
+RUN cd /opt && wget -q https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -O android-sdk.zip
 RUN cd /opt && unzip android-sdk.zip
 RUN cd /opt && rm -f android-sdk.zip
 
