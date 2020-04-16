@@ -197,8 +197,13 @@ public class MediaControlsWidget extends UIWidget implements MediaElement.Delega
             if (mMedia == null) {
                 return false;
             }
+            if(event.getX()<0)
+            {
+                mVolumeControl.setVisibility(View.GONE);
+                return false;
+            }
             if (event.getAction() == MotionEvent.ACTION_HOVER_MOVE || event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
-                float threshold = (float)MediaControlsWidget.this.getMeasuredWidth() * 0.65f;
+                float threshold = mMediaVolumeButton.getX();
                 boolean isVisible = mVolumeControl.getVisibility() == View.VISIBLE;
                 boolean makeVisible = event.getX() >= threshold;
                 if (isVisible != makeVisible) {
