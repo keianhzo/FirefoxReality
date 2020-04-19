@@ -23,7 +23,6 @@ import org.mozilla.vrbrowser.ui.views.UIButton;
 import org.mozilla.vrbrowser.ui.views.VolumeControl;
 import org.mozilla.vrbrowser.ui.widgets.menus.VideoProjectionMenuWidget;
 
-import java.util.Timer;
 
 public class MediaControlsWidget extends UIWidget implements MediaElement.Delegate {
 
@@ -389,11 +388,6 @@ public class MediaControlsWidget extends UIWidget implements MediaElement.Delega
 
     public void stopVolumeCtrlHandler() {
         mVolumeCtrlHandler.removeCallbacks(mVolumeCtrlRunnable);
-    }
-
-    public void restart() {
-        mVolumeCtrlHandler.removeCallbacks(mVolumeCtrlRunnable);
-        mVolumeCtrlHandler.postDelayed(mVolumeCtrlRunnable, VOLUME_SLIDER_CHECK_DELAY);
     }
 
 }
