@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import org.mozilla.telemetry.schedule.jobscheduler.TelemetryJobService;
 import org.mozilla.vrbrowser.R;
 import org.mozilla.geckoview.MediaElement;
 import org.mozilla.vrbrowser.browser.Media;
@@ -83,7 +84,7 @@ public class MediaControlsWidget extends UIWidget implements MediaElement.Delega
         mOffsetViewBounds = new Rect();
         mVolumeCtrlRunnable = () -> {
             if ((mHideVolumeSlider) && (mVolumeControl.getVisibility() == View.VISIBLE)) {
-                mVolumeControl.setVisibility(View.GONE);
+                mVolumeControl.setVisibility(View.INVISIBLE);
                 stopVolumeCtrlHandler();
             }
         };
@@ -204,45 +205,34 @@ public class MediaControlsWidget extends UIWidget implements MediaElement.Delega
             mVolumeControl.requestFocusFromTouch();
         });
 
-        this.setOnHoverListener((v, event) -> {
-            if (mMedia == null) {
-                return false;
-            }
-            if (event.getX() < 0) {
-                this.mHideVolumeSlider = true;
-                this.startVolumeCtrlHandler();
-                return false;
-            }
-            if (event.getAction() == MotionEvent.ACTION_HOVER_MOVE || event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
-                float threshold = mMediaVolumeButton.getX();
-                boolean isVisible = mVolumeControl.getVisibility() == View.VISIBLE;
-                boolean makeVisible = event.getX() >= threshold;
-                if (isVisible != makeVisible) {
-                    if (makeVisible) {
-                        mVolumeControl.setVisibility(View.VISIBLE);
-                        this.mHideVolumeSlider = false;
-                        this.stopVolumeCtrlHandler();
-                    } else {
-                        this.mHideVolumeSlider = true;
-                        this.startVolumeCtrlHandler();
-                    }
-                }
-            } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT && !mMediaVolumeButton.isHovered() && this.isInTouchMode()) {
-                //mVolumeControl.setVisibility(View.INVISIBLE);
-                this.mHideVolumeSlider = true;
-                this.startVolumeCtrlHandler();
-            }
-            return false;
-        });
 
         mMediaVolumeButton.setOnHoverListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER || event.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
+            float startY = v.getY();
+            float maxY = startY + v.getHeight();
+            //for this we only hide on the left side of volume button or outside y area of button
+            if ((event.getX() <= 0) || (!(event.getY() > startY && event.getY() < maxY))) {
+                this.mHideVolumeSlider = true;
+                this.startVolumeCtrlHandler();
+
+            } else {
                 mVolumeControl.setVisibility(View.VISIBLE);
                 this.mHideVolumeSlider = false;
                 this.stopVolumeCtrlHandler();
             }
             return false;
         });
+
+        mVolumeControl.setOnHoverListener((v, event) -> {
+            float startY = v.getY();
+            float maxY = startY + v.getHeight();
+            //for this we only hide on the right side of volume button or outside y area of button
+            if ((event.getX() < 0) || (event.getX() >= v.getWidth()) || (!(event.getY() > startY && event.getY() < maxY))) {
+                this.mHideVolumeSlider = true;
+                this.startVolumeCtrlHandler();
+            }
+            return false;
+        });
+
 
         mMediaProjectionButton.setOnHoverListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER || event.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
@@ -389,5 +379,6 @@ public class MediaControlsWidget extends UIWidget implements MediaElement.Delega
     public void stopVolumeCtrlHandler() {
         mVolumeCtrlHandler.removeCallbacks(mVolumeCtrlRunnable);
     }
+
 
 }
