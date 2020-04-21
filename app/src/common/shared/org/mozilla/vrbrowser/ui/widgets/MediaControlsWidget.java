@@ -211,37 +211,32 @@ public class MediaControlsWidget extends UIWidget implements MediaElement.Delega
             float maxY = startY + v.getHeight();
             //for this we only hide on the left side of volume button or outside y area of button
             if ((event.getX() <= 0) || (!(event.getY() > startY && event.getY() < maxY))) {
-                this.mHideVolumeSlider = true;
-                this.startVolumeCtrlHandler();
+                mHideVolumeSlider = true;
+                startVolumeCtrlHandler();
 
             } else {
                 mVolumeControl.setVisibility(View.VISIBLE);
-                this.mHideVolumeSlider = false;
-                this.stopVolumeCtrlHandler();
+                mHideVolumeSlider = false;
+                stopVolumeCtrlHandler();
             }
             return false;
         });
 
         mVolumeControl.setOnHoverListener((v, event) -> {
-            float startY = v.getY();
+            float startY = 0;
             float maxY = startY + v.getHeight();
+            if ((event.getX() > 0 && event.getX() < v.getWidth()) && (event.getY() > startY && event.getY() < maxY)) {
+                mHideVolumeSlider = false;
+                stopVolumeCtrlHandler();
+            }
             //for this we only hide on the right side of volume button or outside y area of button
-            if ((event.getX() < 0) || (event.getX() >= v.getWidth()) || (!(event.getY() > startY && event.getY() < maxY))) {
-                this.mHideVolumeSlider = true;
-                this.startVolumeCtrlHandler();
+            else if ((event.getX() < 0) || (event.getX() >= v.getWidth()) || (!(event.getY() > startY && event.getY() < maxY))) {
+                mHideVolumeSlider = true;
+                startVolumeCtrlHandler();
             }
             return false;
         });
 
-
-        mMediaProjectionButton.setOnHoverListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER || event.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
-                // mVolumeControl.setVisibility(View.INVISIBLE);
-                this.mHideVolumeSlider = true;
-                this.startVolumeCtrlHandler();
-            }
-            return false;
-        });
     }
 
     @Override
