@@ -917,8 +917,12 @@ public class WindowWidget extends UIWidget implements SessionChangeListener,
     }
 
     public void restoreBeforeFullscreenPlacement() {
+        // We need to process `composited` separately to handle GV content process onCrash/onKill.
+        // Composited is false after a content crash but it was true when the placement was saved.
+        boolean composited = mWidgetPlacement.composited;
         mWindowPlacement = mWindowPlacementBeforeFullscreen;
         mWidgetPlacement.copyFrom(mPlacementBeforeFullscreen);
+        mWidgetPlacement.composited = composited;
     }
 
     public WidgetPlacement getBeforeFullscreenPlacement() {
@@ -1374,7 +1378,7 @@ public class WindowWidget extends UIWidget implements SessionChangeListener,
             }
             mAppDialog.releaseWidget();
         });
-        mConfirmDialog.setLinkDelegate((widget, url) -> {
+        mAppDialog.setLinkDelegate((widget, url) -> {
             mWidgetManager.openNewTabForeground(url);
             mAppDialog.hide(REMOVE_WIDGET);
             if (linkCallback != null) {
@@ -1664,37 +1668,29 @@ public class WindowWidget extends UIWidget implements SessionChangeListener,
 
     // VideoAvailabilityListener
 
-    private Media mMedia;
-
     @Override
-    public void onVideoAvailabilityChanged(boolean aVideosAvailable) {
+    public void onVideoAvailabilityChanged(@NonNull Media aMedia, boolean aVideoAvailable) {
         boolean mediaAvailable;
         if (mSession != null) {
-            if (mMedia != null) {
-                mMedia.removeMediaListener(mMediaDelegate);
-            }
-
-            mMedia = mSession.getFullScreenVideo();
-            if (aVideosAvailable && mMedia != null) {
-                mMedia.addMediaListener(mMediaDelegate);
-                mediaAvailable = true;
+            if (aVideoAvailable) {
+                aMedia.addMediaListener(mMediaDelegate);
 
             } else {
-                mediaAvailable = false;
+                aMedia.removeMediaListener(mMediaDelegate);
             }
+            mediaAvailable = mSession.getActiveVideo() != null;
 
         } else {
             mediaAvailable = false;
         }
 
         if (mediaAvailable) {
-            if (mSession.getFullScreenVideo().isPlayed()) {
-                mViewModel.setIsMediaAvailable(true);
+            if (mSession.getActiveVideo().isPlayed()) {
                 mViewModel.setIsMediaPlaying(true);
             }
+            mViewModel.setIsMediaAvailable(true);
 
         } else {
-            mMedia = null;
             mViewModel.setIsMediaAvailable(false);
             mViewModel.setIsMediaPlaying(false);
         }
@@ -1750,6 +1746,8 @@ public class WindowWidget extends UIWidget implements SessionChangeListener,
     public void onLocationChange(@NonNull GeckoSession session, @Nullable String url) {
         mViewModel.setUrl(url);
         mViewModel.setIsDrmUsed(false);
+        mViewModel.setIsMediaAvailable(false);
+        mViewModel.setIsMediaPlaying(false);
 
         if (StringUtils.isEmpty(url)) {
             mViewModel.setIsBookmarked(false);

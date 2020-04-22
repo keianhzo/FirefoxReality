@@ -24,7 +24,6 @@ import org.mozilla.vrbrowser.ui.views.UIButton;
 import org.mozilla.vrbrowser.ui.views.VolumeControl;
 import org.mozilla.vrbrowser.ui.widgets.menus.VideoProjectionMenuWidget;
 
-
 public class MediaControlsWidget extends UIWidget implements MediaElement.Delegate {
 
     private Media mMedia;
@@ -82,12 +81,14 @@ public class MediaControlsWidget extends UIWidget implements MediaElement.Delega
         mMutedIcon = aContext.getDrawable(R.drawable.ic_icon_media_volume_muted);
         mVolumeIcon = aContext.getDrawable(R.drawable.ic_icon_media_volume);
         mOffsetViewBounds = new Rect();
+
         mVolumeCtrlRunnable = () -> {
             if ((mHideVolumeSlider) && (mVolumeControl.getVisibility() == View.VISIBLE)) {
                 mVolumeControl.setVisibility(View.INVISIBLE);
                 stopVolumeCtrlHandler();
             }
         };
+
         mMediaPlayButton.setOnClickListener(v -> {
             if (mMedia.isEnded()) {
                 mMedia.seek(0);
@@ -191,8 +192,8 @@ public class MediaControlsWidget extends UIWidget implements MediaElement.Delega
                 childView.getDrawingRect(mOffsetViewBounds);
                 MediaControlsWidget.this.offsetDescendantRectToMyCoords(childView, mOffsetViewBounds);
 
-                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mMediaSeekLabel.getLayoutParams();
-                params.setMarginStart(mOffsetViewBounds.left + (int) (aRatio * mOffsetViewBounds.width()) - mMediaSeekLabel.getMeasuredWidth() / 2);
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)mMediaSeekLabel.getLayoutParams();
+                params.setMarginStart(mOffsetViewBounds.left + (int)(aRatio * mOffsetViewBounds.width()) - mMediaSeekLabel.getMeasuredWidth() / 2);
                 mMediaSeekLabel.setLayoutParams(params);
             }
         });
@@ -204,7 +205,6 @@ public class MediaControlsWidget extends UIWidget implements MediaElement.Delega
             }
             mVolumeControl.requestFocusFromTouch();
         });
-
 
         mMediaVolumeButton.setOnHoverListener((v, event) -> {
             float startY = v.getY();
@@ -374,6 +374,4 @@ public class MediaControlsWidget extends UIWidget implements MediaElement.Delega
     public void stopVolumeCtrlHandler() {
         mVolumeCtrlHandler.removeCallbacks(mVolumeCtrlRunnable);
     }
-
-
 }

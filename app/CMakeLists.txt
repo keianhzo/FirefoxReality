@@ -31,7 +31,6 @@ add_library( # Sets the name of the library.
              src/main/cpp/ExternalVR.cpp
              src/main/cpp/GeckoSurfaceTexture.cpp
              src/main/cpp/GestureDelegate.cpp
-             src/main/cpp/LoadingAnimation.cpp
              src/main/cpp/JNIUtil.cpp
              src/main/cpp/Pointer.cpp
              src/main/cpp/Skybox.cpp
@@ -128,11 +127,6 @@ set_target_properties(ovrplatform-lib PROPERTIES IMPORTED_LOCATION
 add_library(wavevr-lib SHARED IMPORTED)
 set_target_properties(wavevr-lib PROPERTIES IMPORTED_LOCATION
                       ${CMAKE_SOURCE_DIR}/../third_party/wavesdk/build/wvr_client/jni/${ANDROID_ABI}/libwvr_api.so )
-
-add_library(picovr-lib SHARED IMPORTED)
-set_target_properties(picovr-lib PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/../third_party/picovr/${ANDROID_ABI}/libPvr_NativeSDK.so )
-
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this

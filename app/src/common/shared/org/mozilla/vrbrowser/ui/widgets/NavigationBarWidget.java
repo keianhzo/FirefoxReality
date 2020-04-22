@@ -401,6 +401,8 @@ public class NavigationBarWidget extends UIWidget implements GeckoSession.Naviga
     public void onPause() {
         super.onPause();
         mBinding.navigationBarNavigation.urlBar.onPause();
+        exitFullScreenMode();
+        exitVRVideo();
     }
 
     @Override
@@ -448,7 +450,6 @@ public class NavigationBarWidget extends UIWidget implements GeckoSession.Naviga
         aPlacement.parentAnchorX = 0.5f;
         aPlacement.parentAnchorY = 0.0f;
         aPlacement.translationY = -35;
-        aPlacement.opaque = false;
         aPlacement.cylinder = true;
     }
 
@@ -558,6 +559,7 @@ public class NavigationBarWidget extends UIWidget implements GeckoSession.Naviga
     public void onSessionChanged(@NonNull Session aOldSession, @NonNull Session aSession) {
         cleanSession(aOldSession);
         setUpSession(aSession);
+        exitFullScreenMode();
     }
 
     @Override
@@ -601,7 +603,7 @@ public class NavigationBarWidget extends UIWidget implements GeckoSession.Naviga
     }
 
     private void exitFullScreenMode() {
-        if (mAttachedWindow == null) {
+        if (mAttachedWindow == null || !mViewModel.getIsFullscreen().getValue().get()) {
             return;
         }
 

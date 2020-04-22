@@ -39,7 +39,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import mozilla.components.concept.sync.AccountObserver;
 import mozilla.components.concept.sync.AuthType;
@@ -59,6 +61,11 @@ public class Windows implements TrayListener, TopBarWidget.Delegate, TitleBarWid
     private static final int TAB_ADDED_NOTIFICATION_ID = 0;
     private static final int TAB_SENT_NOTIFICATION_ID = 1;
     private static final int BOOKMARK_ADDED_NOTIFICATION_ID = 2;
+
+    // Restore URLs blacklist
+    private static final List<String> SAVE_BLACKLIST = Stream.of(
+      "https://accounts.firefox.com/oauth/"
+    ).collect(Collectors.toList());
 
     class WindowState {
         WindowPlacement placement;
@@ -185,11 +192,17 @@ public class Windows implements TrayListener, TopBarWidget.Delegate, TitleBarWid
             state.privateMode = mPrivateMode;
             state.focusedWindowPlacement = mFocusedWindow.isFullScreen() ?  mFocusedWindow.getWindowPlacementBeforeFullscreen() : mFocusedWindow.getWindowPlacement();
             ArrayList<Session> sessions = SessionStore.get().getSortedSessions(false);
-            state.tabs = sessions.stream().map(Session::getSessionState).collect(Collectors.toCollection(ArrayList::new));
+            state.tabs = sessions.stream()
+                    .map(Session::getSessionState)
+                    .filter(sessionState -> SAVE_BLACKLIST.stream().noneMatch(uri -> sessionState.mUri.startsWith(uri)))
+                    .collect(Collectors.toCollection(ArrayList::new));
             for (WindowWidget window : mRegularWindows) {
-                WindowState windowState = new WindowState();
-                windowState.load(window, state, sessions.indexOf(window.getSession()));
-                state.regularWindowsState.add(windowState);
+                if (window.getSession() != null &&
+                        SAVE_BLACKLIST.stream().noneMatch(uri -> window.getSession().getCurrentUri().startsWith(uri))) {
+                    WindowState windowState = new WindowState();
+                    windowState.load(window, state, sessions.indexOf(window.getSession()));
+                    state.regularWindowsState.add(windowState);
+                }
             }
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             gson.toJson(state, writer);
@@ -747,6 +760,8 @@ public class Windows implements TrayListener, TopBarWidget.Delegate, TitleBarWid
             setFirstPaint(aWindow, aWindow.getSession());
         }
         aWindow.setVisible(aVisible);
+        aWindow.getTitleBar().setVisible(aVisible);
+        aWindow.getTopBar().setVisible(aVisible);
     }
 
     private void placeWindow(@NonNull WindowWidget aWindow, WindowPlacement aPosition) {
@@ -1070,8 +1085,10 @@ public class Windows implements TrayListener, TopBarWidget.Delegate, TitleBarWid
     @Override
     public void onMediaPlayClicked(@NonNull TitleBarWidget titleBar) {
         for (WindowWidget window : getCurrentWindows()) {
-            if (window.getTitleBar() == titleBar) {
-                window.getSession().getFullScreenVideo().play();
+            if (window.getTitleBar() == titleBar &&
+                    window.getSession() != null &&
+                    window.getSession().getActiveVideo() != null) {
+                window.getSession().getActiveVideo().play();
             }
         }
     }
@@ -1079,8 +1096,10 @@ public class Windows implements TrayListener, TopBarWidget.Delegate, TitleBarWid
     @Override
     public void onMediaPauseClicked(@NonNull TitleBarWidget titleBar) {
         for (WindowWidget window : getCurrentWindows()) {
-            if (window.getTitleBar() == titleBar) {
-                window.getSession().getFullScreenVideo().pause();
+            if (window.getTitleBar() == titleBar &&
+                    window.getSession() != null &&
+                    window.getSession().getActiveVideo() != null) {
+                window.getSession().getActiveVideo().pause();
             }
         }
     }
